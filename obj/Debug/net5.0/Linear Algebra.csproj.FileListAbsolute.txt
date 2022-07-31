@@ -1,0 +1,16 @@
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\Linear Algebra.exe
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\Linear Algebra.deps.json
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\Linear Algebra.runtimeconfig.json
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\Linear Algebra.runtimeconfig.dev.json
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\Linear Algebra.dll
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\ref\Linear Algebra.dll
+C:\Users\Amitai\source\repos\Linear Algebra\bin\Debug\net5.0\Linear Algebra.pdb
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.AssemblyInfoInputs.cache
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.AssemblyInfo.cs
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.csproj.CoreCompileInputs.cache
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.dll
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\ref\Linear Algebra.dll
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.pdb
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.genruntimeconfig.cache
+C:\Users\Amitai\source\repos\Linear Algebra\obj\Debug\net5.0\Linear Algebra.csproj.AssemblyReference.cache
