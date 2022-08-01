@@ -71,7 +71,7 @@
         public Transform<V, F> ValueOf<V>(Transform<V, F> T) where V : Vector<F>
         {
             Transform<V, F> res = T.Zero() as Transform<V, F>;
-            Transform<V, F> pow = new Transform<V, F>(Transform<V, F>.identity);
+            Transform<V, F> pow = T.Identity();
             foreach(F c in coefficients)
             {
                 res = (res + c * (pow as Vector<F>)) as Transform<V, F>;

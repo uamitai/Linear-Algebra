@@ -35,10 +35,10 @@ namespace Linear_Algebra
         abstract public ColumnVector<F> ToColumnVector();
         public int Length() { return entries.Length; }
 
-        protected F this[int i, int j]
+        public F this[int i, int j]
         {
             get { return entries[i, j]; }
-            set { entries[i, j] = value; }
+            protected set { entries[i, j] = value; }
         }
 
         public Vector<F> Add(Vector<F> vec)
@@ -99,6 +99,9 @@ namespace Linear_Algebra
 
         protected F[,] MatMultiplication(AbstractMatrix<F> other)
         {
+            if(cols!= other.rows) { throw new MatrixSizeException(string.Format(
+                "Invalid sizes for matrix multiplication:\n{0}\n{1}", this, other)); }
+
             F[,] res = new F[rows, other.cols];
             for (int i = 0; i < rows; i++)
             {
@@ -117,54 +120,17 @@ namespace Linear_Algebra
 
         public static AbstractMatrix<F> operator * (AbstractMatrix<F> mat1, AbstractMatrix<F> mat2)
         {
-            if (mat1.cols != mat2.rows) { throw new MatrixSizeException(string.Format(
-                "Invalid sizes for matrix multiplication:\n{0}\n{1}", mat1, mat2)); }
-
             return new Matrix<F>(mat1.MatMultiplication(mat2));
         }
 
         public static ColumnVector<F> operator * (AbstractMatrix<F> matrix, ColumnVector<F> vector)
         {
-            if (matrix.cols != vector.length) { throw new MatrixSizeException(string.Format(
-                "Invalid sizes for matrix multiplication:\n{0}\n{1}", matrix, vector)); }
-
             return new ColumnVector<F>(matrix.MatMultiplication(vector));
         }
 
         protected F FieldZero() { return (F)this[0, 0].Zero(); }
 
         protected F FieldOne() { return (F)this[0, 0].One(); }
-
-        protected delegate void SwapOp(int row1, int row2);
-        protected delegate void MultiplyOp(int row, F scalar);
-        protected delegate void AddOp(int src, int dst, F scalar);
-
-        protected void SwapRows(int row1, int row2)
-        {
-            F tmp;
-            for (int i = 0; i < cols; i++)
-            {
-                tmp = this[row1, i];
-                this[row1, i] = this[row2, i];
-                this[row2, i] = tmp;
-            }
-        }
-
-        protected void MultiplyRow(int row, F scalar)
-        {
-            for (int i = 0; i < cols; i++)
-            {
-                this[row, i] = (F)(scalar * this[row, i]);
-            }
-        }
-
-        protected void AddRow(int src, int dst, F scalar)
-        {
-            for (int i = 0; i < cols; i++)
-            {
-                this[dst, i] = (F)(this[dst, i] + scalar * this[src, i]);
-            }
-        }
 
         public override bool Equals(object obj)
         {

@@ -1,21 +1,25 @@
 ﻿namespace Linear_Algebra
 {
-    class Transform<V, F> : Vector<F> where F : Field where V : Vector<F>
+    class Transform<V, W, F> : Vector<F> where F : Field where V : Vector<F> where W : Vector<F>
     {
-        public delegate V LinearTransform(V vector);
-        public static readonly LinearTransform zero = (vector) => (V)vector.Zero();
-        public static readonly LinearTransform identity = (vector) => vector;
+        public delegate W LinearTransform(V vector);
 
-        private readonly LinearTransform transform;
+        protected readonly LinearTransform transform;
+        private readonly VectorSpace<V, F> domain;
+        private readonly VectorSpace<W, F> range;
+        public readonly Matrix<F> matrixRep;
 
-        public Transform(LinearTransform transform)
+        public Transform(VectorSpace<V, F> domain, VectorSpace<W, F> range, LinearTransform transform)
         {
+            this.domain = domain;
+            this.range = range;
             this.transform = transform;
+            this.matrixRep = GetMatrixRep();
         }
 
         public int Length()
         {
-            throw new System.NotImplementedException();
+            return domain.dim * range.dim;
         }
 
         public ColumnVector<F> ToColumnVector()
@@ -23,41 +27,128 @@
             throw new System.NotImplementedException();
         }
 
-        public V ValueOf(V vector)
+        // @pre domain.Contains(vector)
+        public W ValueOf(V vector)
         {
             return transform(vector);
         }
 
-        public Vector<F> Add(Vector<F> vector)
+        public virtual Vector<F> Add(Vector<F> vector)
+        {
+            Transform<V, W, F> other = vector as Transform<V, W, F>;
+            return new Transform<V, W, F>(domain, range,
+                vec => (W)(transform(vec) + other.transform(vec)));
+        }
+
+        public virtual Vector<F> Multiply(F scalar)
+        {
+            return new Transform<V, W, F>(domain, range,
+                vector => (W)(scalar * transform(vector)));
+        }
+
+        public virtual Vector<F> Zero()
+        {
+            return new Transform<V, W, F>(domain, range,
+                vector => (W)transform(vector).Zero());
+        }
+
+        public virtual Vector<F> AddInverse()
+        {
+            return new Transform<V, W, F>(domain, range,
+                vector => (W)transform(vector).AddInverse());
+        }
+
+        public VectorSpace<W, F> Image()
+        {
+            return Image(domain);
+        }
+
+        public VectorSpace<W, F> Image(VectorSpace<V, F> vectorSpace)
+        {
+            VectorSpace<W, F> im = new VectorSpace<W, F>(range.dim);
+            foreach (V vector in vectorSpace)
+            {
+                im.Add(transform(vector));
+            }
+            return im;
+        }
+
+        private Matrix<F> GetMatrixRep()
+        {
+            F[,] rep = new F[range.dim, domain.dim];
+            int col = 0;
+            ColumnVector<F> colVec;
+            foreach (V vector in domain)
+            {
+                colVec = range.CoordinatesOf(transform(vector));
+                for (int row = 0; row < range.dim; row++)
+                {
+                    rep[row, col] = colVec[row];
+                }
+                col++;
+            }
+            return new Matrix<F>(rep);
+        }
+
+        public VectorSpace<V, F> Kernel()
+        {
+            VectorSpace<V, F> kernel = new VectorSpace<V, F>(domain.dim);
+            VectorSpace<ColumnVector<F>, F> nullSpace = matrixRep.NullSpace();
+            foreach (ColumnVector<F> vector in nullSpace)
+            {
+                kernel.Add(domain.LinearCombination(vector));
+            }
+            return kernel;
+        }
+    }
+
+    class Transform<V, F> : Transform<V, V ,F> where F : Field where V : Vector<F>
+    {
+        public static readonly LinearTransform zero = vector => (V)vector.Zero();
+        public static readonly LinearTransform identity = vector => vector;
+        private VectorSpace<V, F> vectorSpace;
+
+        public Transform(VectorSpace<V, F> vectorSpace, LinearTransform transform)
+            : base(vectorSpace, vectorSpace, transform) { this.vectorSpace = vectorSpace; }
+
+        public override Vector<F> Add(Vector<F> vector)
         {
             Transform<V, F> other = vector as Transform<V, F>;
-            return new Transform<V, F>(vec => (V)(transform(vec) + other.transform(vec)));
+            return new Transform<V, F>(vectorSpace, vec => (V)(transform(vec) + other.transform(vec)));
         }
 
-        public Vector<F> Multiply(F scalar)
+        public override Vector<F> Multiply(F scalar)
         {
-            return new Transform<V, F>(vector => (V)(scalar * transform(vector)));
+            return new Transform<V, F>(vectorSpace, vector => (V)(scalar * vector));
         }
 
-        public Vector<F> Zero() { return new Transform<V, F>(zero); }
-
-        public Vector<F> AddInverse()
+        public override Vector<F> Zero()
         {
-            return new Transform<V, F>(vector => (V)transform(vector).AddInverse());
+            return new Transform<V, F>(vectorSpace, zero);
+        }
+
+        public override Vector<F> AddInverse()
+        {
+            return new Transform<V, F>(vectorSpace, vector => (V)vector.AddInverse());
+        }
+
+        public Transform<V, F> Identity()
+        {
+            return new Transform<V, F>(vectorSpace, identity);
         }
 
         public static Transform<V, F> operator * (Transform<V, F> T, Transform<V, F> S)
         {
-            return new Transform<V, F>(vector => T.transform(S.transform(vector)));
+            return new Transform<V, F>(T.vectorSpace, vector => T.transform(S.transform(vector)));
         }
 
         public Transform<V, F> Power(int exp)
         {
             Transform<V, F> res = identity as Transform<V, F>;
             Transform<V, F> pow = this;
-            while(exp > 0)
+            while (exp > 0)
             {
-                if(exp % 2 == 1)
+                if (exp % 2 == 1)
                 {
                     res *= pow;
                     exp--;
@@ -66,46 +157,6 @@
                 exp /= 2;
             }
             return res;
-        }
-
-        public VectorSpace<V, F> Image(VectorSpace<V, F> vectorSpace)
-        {
-            VectorSpace<V, F> im = new VectorSpace<V, F>(vectorSpace.dim);
-            foreach(V vector in vectorSpace)
-            {
-                im.Add(transform(vector));
-            }
-            return im;
-        }
-
-        // @pre vectorSpace.Dimension() == vectorSpace.dim
-        public SquareMatrix<F> MatrixRep(VectorSpace<V, F> vectorSpace)
-        {
-            int dim = vectorSpace.dim;
-            F[,] rep = new F[dim, dim];
-            int col = 0;
-            ColumnVector<F> colVec;
-            foreach(V vector in vectorSpace)
-            {
-                colVec = vectorSpace.CoordinatesOf(transform(vector));
-                for (int row = 0; row < dim; row++)
-                {
-                    rep[row, col] = colVec[row];
-                }
-                col++;
-            }
-            return new SquareMatrix<F>(rep);
-        }
-
-        public VectorSpace<V, F> Kernel(VectorSpace<V, F> vectorSpace)
-        {
-            VectorSpace<V, F> kernel = new VectorSpace<V, F>(vectorSpace.dim);
-            VectorSpace<ColumnVector<F>, F> nullSpace = MatrixRep(vectorSpace).NullSpace();
-            foreach(ColumnVector<F> vector in nullSpace)
-            {
-                kernel.Add(vectorSpace.LinearCombination(vector));
-            }
-            return kernel;
         }
     }
 }

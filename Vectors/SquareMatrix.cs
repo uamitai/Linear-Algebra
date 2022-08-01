@@ -53,6 +53,11 @@
             return sum;
         }
 
+        public Transform<ColumnVector<F>, F> ToTransform()
+        {
+            return new Transform<ColumnVector<F>, F>(ColumnSpace(), vector => this * vector);
+        }
+
         // @pre no null entries
         public static SquareMatrix<F> Diag(params F[] entries)
         {

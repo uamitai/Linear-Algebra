@@ -39,12 +39,38 @@
             return tr;
         }
 
-        public Transform<ColumnVector<F>, F> ToTransform()
+        #region Gaussian Elimination and matrix ranking
+
+        protected delegate void SwapOp(int row1, int row2);
+        protected delegate void MultiplyOp(int row, F scalar);
+        protected delegate void AddOp(int src, int dst, F scalar);
+
+        protected void SwapRows(int row1, int row2)
         {
-            return new Transform<ColumnVector<F>, F>(vec => this * vec);
+            F tmp;
+            for (int i = 0; i < cols; i++)
+            {
+                tmp = this[row1, i];
+                this[row1, i] = this[row2, i];
+                this[row2, i] = tmp;
+            }
         }
 
-        #region Gaussian Elimination and matrix ranking
+        protected void MultiplyRow(int row, F scalar)
+        {
+            for (int i = 0; i < cols; i++)
+            {
+                this[row, i] = (F)(scalar * this[row, i]);
+            }
+        }
+
+        protected void AddRow(int src, int dst, F scalar)
+        {
+            for (int i = 0; i < cols; i++)
+            {
+                this[dst, i] = (F)(this[dst, i] + scalar * this[src, i]);
+            }
+        }
 
         protected static int RowEchelonForm(Matrix<F> matrix, AddOp add, SwapOp swap)
         {
@@ -136,19 +162,22 @@
                 // which isn't a leading one, otherwise continue
                 pos = 0;
                 while (pos < rank && matrix[pos, col].Equals(matrix.FieldZero())) { pos++; }
-                if (pos == rank || leadingEntries[pos] == col) { continue; }
+                if (pos < rank && leadingEntries[pos] == col) { continue; }
 
                 // Initialize a vector with a length equal to the number of columns
+                // Place a 1 in the entry according to this column
                 vector = new F[matrix.cols];
                 for (int i = 0; i < matrix.cols; i++) { vector[i] = matrix.FieldZero(); }
-
-                // For every row with a non-zero (a.k.a the first #rank rows) place an entry in the vector
-                // also place a one in the entry according to the current column
-                for (int i = 0; i < rank; i++)
-                {
-                    vector[leadingEntries[i]] = (F)matrix[i, col].AddInverse();
-                }
                 vector[col] = matrix.FieldOne();
+
+                if(pos < rank)
+                {
+                    // For every row with a non-zero place an entry in the vector
+                    for (int i = 0; i < rank; i++)
+                    {
+                        vector[leadingEntries[i]] = (F)matrix[i, col].AddInverse();
+                    }
+                }
 
                 // Finally the vector is ready to be added to the null space
                 nullSpace.Add(new ColumnVector<F>(vector));
@@ -174,6 +203,7 @@
             return colSpace;
         }
 
+        // @post $ret == null iff the system has no solution
         public static ColumnVector<F> LinearSystemSolution(Matrix<F> matrix, ColumnVector<F> vector)
         {
             if(matrix.rows != vector.length) { throw new MatrixSizeException(string.Format(
