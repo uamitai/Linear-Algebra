@@ -55,7 +55,7 @@
 
         public Transform<ColumnVector<F>, F> ToTransform()
         {
-            return new Transform<ColumnVector<F>, F>(ColumnSpace(), vector => this * vector);
+            return new Transform<ColumnVector<F>, F>(ColumnSpace() + NullSpace(), vector => this * vector);
         }
 
         // @pre no null entries
@@ -162,9 +162,10 @@
 
         public bool IsInvertible()
         {
-            return !Determinant().Equals(FieldZero());
+            return !Determinant().IsZero();
         }
 
+        // @pre IsInvertible()
         public SquareMatrix<F> Inverse()
         {
             SquareMatrix<F> clone = Clone(), id = Identity();
@@ -178,5 +179,15 @@
         }
 
         #endregion
+
+        public bool IsEigenValue(F scalar)
+        {
+            return !((this - Identity().Multiply(scalar)) as SquareMatrix<F>).IsInvertible();
+        }
+
+        public VectorSpace<ColumnVector<F>, F> EigenSpace(F eigenValue)
+        {
+            return ((this - Identity().Multiply(eigenValue)) as SquareMatrix<F>).NullSpace();
+        }
     }
 }

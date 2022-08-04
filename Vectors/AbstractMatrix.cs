@@ -33,7 +33,6 @@ namespace Linear_Algebra
 
         abstract public AbstractMatrix<F> Clone();
         abstract public ColumnVector<F> ToColumnVector();
-        public int Length() { return entries.Length; }
 
         public F this[int i, int j]
         {

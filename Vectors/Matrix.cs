@@ -2,7 +2,6 @@
 {
     class Matrix<F> : AbstractMatrix<F> where F : Field
     {
-
         protected Matrix(int m, int n) : base(m, n) { }
 
         public Matrix(F[,] entries) : base(entries) { }
@@ -81,7 +80,7 @@
                 // Find first non-zero entry in the column
                 // If not found, continue to the next one
                 pos = rank;
-                while(pos < matrix.rows && matrix[pos, i].Equals(matrix.FieldZero())) { pos++; }
+                while(pos < matrix.rows && matrix[pos, i].IsZero()) { pos++; }
                 if (pos == matrix.rows) { continue; }
 
                 // if first non-zero entry is after the current row, swap them
@@ -121,7 +120,7 @@
             for (int row = 0; row < rank; row++)
             {
                 // Find the leading entry in a row and multiply it by its inverse
-                while(matrix[row, col].Equals(matrix.FieldZero())) { col++; }
+                while(matrix[row, col].IsZero()) { col++; }
                 multiply(row, (F)matrix[row, col].MultInverse());
 
                 // nullify each entry in the column above the row
@@ -153,7 +152,7 @@
             int[] leadingEntries = new int[rank];
             for (int i = 0; i < matrix.cols && pos < rank; i++)
             {
-                if(!matrix[pos, i].Equals(matrix.FieldZero())) { leadingEntries[pos++] = i; }
+                if(!matrix[pos, i].IsZero()) { leadingEntries[pos++] = i; }
             }
 
             for (int col = 0; col < matrix.cols; col++)
@@ -161,7 +160,7 @@
                 // Check whether the column has a non-zero entry
                 // which isn't a leading one, otherwise continue
                 pos = 0;
-                while (pos < rank && matrix[pos, col].Equals(matrix.FieldZero())) { pos++; }
+                while (pos < rank && matrix[pos, col].IsZero()) { pos++; }
                 if (pos < rank && leadingEntries[pos] == col) { continue; }
 
                 // Initialize a vector with a length equal to the number of columns
@@ -228,7 +227,7 @@
             // Check each entry according to a row of zeros to see whether a solution exists at all
             for (int i = rank; i < matrix.rows; i++)
             {
-                if(!vector[i].Equals(matrix.FieldZero()))
+                if(!vector[i].IsZero())
                 {
                     return null;
                 }

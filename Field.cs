@@ -23,6 +23,8 @@
         // @post this.Multiply(MultInverse()) == One()
         Field MultInverse();
 
+        bool IsZero() { return Equals(Zero()); }
+
         public static Field operator + (Field a, Field b)
         {
             return a.Add(b);

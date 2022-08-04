@@ -17,7 +17,6 @@
         // @post this.Add(AddInverse()) == Zero()
         Vector<F> AddInverse();
 
-        int Length();
         ColumnVector<F> ToColumnVector();
 
         public static Vector<F> operator + (Vector<F> vec1, Vector<F> vec2)

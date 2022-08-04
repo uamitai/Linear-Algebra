@@ -3,23 +3,23 @@
     class Polynomial<F> : Vector<F> where F : Field
     {
         private readonly ColumnVector<F> coefficients;
-        public readonly int length;
+        public readonly int maxDeg;
 
         // @pre no null coefficients
         public Polynomial(params F[] coeffs) : this(new ColumnVector<F>(coeffs)) { }
 
         // @pre no null coefficients
         // @pre length >= coeffs.length >= 1
-        public Polynomial(int length, params F[] coeffs)
+        public Polynomial(int maxDeg, params F[] coeffs)
         {
-            this.length = length;
-            F[] coeffsCopy = new F[length];
+            this.maxDeg = maxDeg;
+            F[] coeffsCopy = new F[maxDeg + 1];
             F zero = (F)coeffs[0].Zero();
-            for (int i = 0; i < coeffs.Length; i++)
+            for (int i = 0; i < coeffs.Length && i <= maxDeg; i++)
             {
                 coeffsCopy[i] = coeffs[i];
             }
-            for (int i = coeffs.Length; i < length; i++)
+            for (int i = coeffs.Length; i <= maxDeg; i++)
             {
                 coeffsCopy[i] = zero;
             }
@@ -30,7 +30,7 @@
         public Polynomial(ColumnVector<F> coeffs)
         {
             coefficients = coeffs.Clone();
-            length = coeffs.length;
+            maxDeg = coeffs.length - 1;
         }
 
         // @pre 0 <= index < length
@@ -39,16 +39,14 @@
             get { return coefficients[index]; }
         }
 
-        public int Length() { return length; }
-
         // @pre scalar != null
         public F ValueOf(F scalar)
         {
             F res = (F)scalar.Zero();
             F pow = (F)scalar.One();
-            foreach(F c in coefficients)
+            foreach(F coeff in coefficients)
             {
-                res = (F)(res + c * pow);
+                res = (F)(res + coeff * pow);
                 pow = (F)(pow * scalar);
             }
             return res;
@@ -59,23 +57,23 @@
         {
             SquareMatrix<F> res = matrix.Zero() as SquareMatrix<F>;
             SquareMatrix<F> pow = matrix.Identity();
-            foreach(F c in coefficients)
+            foreach(F coeff in coefficients)
             {
-                res = (res + (c * (pow as Vector<F>))) as SquareMatrix<F>;
+                res = (res + pow.Multiply(coeff)) as SquareMatrix<F>;
                 pow *= matrix;
             }
             return res;
         }
 
         // @pre T != null
-        public Transform<V, F> ValueOf<V>(Transform<V, F> T) where V : Vector<F>
+        public Transform<V, F> ValueOf<V>(Transform<V, F> transform) where V : Vector<F>
         {
-            Transform<V, F> res = T.Zero() as Transform<V, F>;
-            Transform<V, F> pow = T.Identity();
-            foreach(F c in coefficients)
+            Transform<V, F> res = transform.Zero() as Transform<V, F>;
+            Transform<V, F> pow = transform.Identity();
+            foreach(F coeff in coefficients)
             {
-                res = (res + c * (pow as Vector<F>)) as Transform<V, F>;
-                pow *= T;
+                res = (res + pow.Multiply(coeff)) as Transform<V, F>;
+                pow *= transform;
             }
             return res;
         }
@@ -108,22 +106,19 @@
             return new Polynomial<F>(coefficients);
         }
 
-        public ColumnVector<F> ToColumnVector()
-        {
-            return coefficients;
-        }
+        public ColumnVector<F> ToColumnVector() { return coefficients; }
 
         public override string ToString()
         {
-            if(length == 0) { return "0"; }
-            F c = this[0];
-            string res = c.Equals(c.Zero()) ? "" : c.ToString();
-            for (int i = 1; i < length; i++)
+            if(maxDeg == 0) { return "0"; }
+            F coeff = this[0];
+            string res = coeff.Equals(coeff.Zero()) ? "" : coeff.ToString();
+            for (int i = 1; i <= maxDeg; i++)
             {
-                c = this[i];
-                if (c.Equals(c.Zero())) { continue; }
+                coeff = this[i];
+                if (coeff.Equals(coeff.Zero())) { continue; }
                 res += res == "" ? "" : " + ";
-                res += term(c, i);
+                res += term(coeff, i);
             }
             return res == "" ? "0" : res;
         }
@@ -138,7 +133,7 @@
                 }
                 return string.Format("x^{0}", pow);
             }
-            if(coeff.ToString().Length == 1)
+            if (coeff.ToString().Length == 1)
             {
                 if (pow == 1)
                 {
@@ -146,7 +141,7 @@
                 }
                 return string.Format("{0}x^{1}", coeff, pow);
             }
-            if(pow == 1)
+            if (pow == 1)
             {
                 return string.Format("({0})x", coeff);
             }

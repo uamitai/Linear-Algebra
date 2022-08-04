@@ -28,7 +28,8 @@ namespace Linear_Algebra
         public bool IsEmpty() { return !basis.Any(); }
 
         // @pre no null vectors
-        // @pre all vectors added to the space must have the Length() be the same as dim
+        // @pre all vectors added to the space must have their size be the same set as the space dimension
+        // for example "new VectorSpace<ColumnVector<Real>, Real>(3)" can only have column vectors with 3 entries
         public void Add(params V[] vectors)
         {
             foreach(V vec in vectors)
@@ -44,16 +45,14 @@ namespace Linear_Algebra
         // @pre vector != null
         public bool Contains(V vector)
         {
-            if (vector.Length() != dim) { return false; }
             if (vector.Equals(vector.Zero())) { return true; }
             if (IsEmpty()) { return false; }
             return Matrix<F>.LinearSystemSolution(matrixRep, vector.ToColumnVector()) != null;
         }
 
-        // @pre vector != null
+        // @pre !IsEmpty() && vector.Length() == dim
         public ColumnVector<F> CoordinatesOf(V vector)
         {
-            if (IsEmpty() || vector.Length() != dim) { return null; }
             return Matrix<F>.LinearSystemSolution(matrixRep, vector.ToColumnVector());
         }
 
@@ -90,7 +89,7 @@ namespace Linear_Algebra
             return to.matrixRep.Inverse() * from.matrixRep;
         }
 
-        // @pre no null scalars && scalars.length == Dimension() && !IsEmpty()
+        // @pre scalars.length == Dimension() && !IsEmpty()
         public V LinearCombination(ColumnVector<F> scalars)
         {
             V linearComb = (V)basis[0].Zero();
