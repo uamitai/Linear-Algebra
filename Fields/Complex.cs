@@ -8,77 +8,89 @@ namespace Linear_Algebra
         public static readonly Complex zero = new Complex(0f, 0f);
         public static readonly Complex one = new Complex(1f, 0f);
 
-        private readonly float re;
-        private readonly float im;
+        protected readonly float real;
+        private readonly float imaginary;
 
         public Complex(float a, float b)
         {
-            re = a;
-            im = b;
+            real = a;
+            imaginary = b;
         }
 
-        public Complex(float a) : this(a, 0) { }
-
-        public Field Add(Field other)
+        public virtual Field Add(Field other)
         {
             Complex complex = other as Complex;
-            return new Complex(re + complex.re, im + complex.im);
+            float re = real + complex.real;
+            float im = imaginary + complex.imaginary;
+            if(Math.Abs(re) < Real.eps) { re = 0; }
+            if(Math.Abs(im) < Real.eps) { im = 0; }
+            return new Complex(re, im);
         }
 
-        public Field Multiply(Field other)
+        public virtual Field Multiply(Field other)
         {
             Complex complex = other as Complex;
-            return new Complex(re * complex.re - im * complex.im, re * complex.im + im * complex.re);
+            return new Complex(real * complex.real - imaginary * complex.imaginary, real * complex.imaginary + imaginary * complex.real);
         }
 
-        public Field Zero() { return zero; }
+        public virtual Field Zero() { return zero; }
 
-        public Field One() { return one; }
+        public virtual Field One() { return one; }
 
-        public Field AddInverse()
+        public virtual Field AddInverse()
         {
-            return new Complex(-re, -im);
+            return new Complex(-real, -imaginary);
         }
 
-        public Field MultInverse()
+        public virtual Field MultInverse()
         {
-            return new Complex(re / sqrMagnitude(), -im / sqrMagnitude());
+            return new Complex(real / SqrMagnitude(), -imaginary / SqrMagnitude());
         }
 
-        private float sqrMagnitude()
+        private float SqrMagnitude()
         {
-            return re * re + im * im;
+            return real * real + imaginary * imaginary;
+        }
+
+        public Complex Magnitude()
+        {
+            return new Real((Multiply(Complement()) as Complex).real);
+        }
+
+        public virtual Complex Complement()
+        {
+            return new Complex(real, -imaginary);
         }
 
         public override bool Equals(object obj)
         {
             Complex complex = obj as Complex;
-            return Math.Abs(re - complex.re) < 0.0001f && Math.Abs(im - complex.im) < 0.0001f;
+            return Math.Abs(real - complex.real) < Real.eps && Math.Abs(imaginary - complex.imaginary) < Real.eps;
         }
 
         public override string ToString()
         {
-            string imaginary;
-            switch (im)
+            string im;
+            switch (imaginary)
             {
                 case 0: 
-                    imaginary = "";
+                    im = "";
                     break;
                 case 1:
-                    imaginary = "i";
+                    im = "i";
                     break;
                 case -1:
-                    imaginary = "-i";
+                    im = "-i";
                     break;
                 default:
-                    imaginary = im + "i";
+                    im = imaginary + "i";
                     break;
             }
-            if(re == 0)
+            if(real == 0)
             {
-                return im == 0 ? "0" : imaginary;
+                return imaginary == 0 ? "0" : im;
             }
-            return im > 0 ? re + "+" + imaginary : re + imaginary;
+            return imaginary > 0 ? real + "+" + im : real + im;
         }
     }
 }

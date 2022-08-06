@@ -3,51 +3,43 @@
 
 namespace Linear_Algebra
 {
-    class Real : Field
+    class Real : Complex
     {
-        public static readonly Real zero = new Real(0f);
-        public static readonly Real one = new Real(1f);
+        public const float eps = 0.005f;
+        public static readonly new Real zero = new Real(0f);
+        public static readonly new Real one = new Real(1f);
 
-        private readonly float value;
+        public Real(float value) : base(value, 0) { }
 
-        public Real(float value)
+        public override Field Add(Field other)
         {
-            this.value = value;
+            float res = real + (other as Real).real;
+            if(Math.Abs(res) < eps) { return zero; }
+            return new Real(res);
         }
 
-        public Field Add(Field other)
+        public override Field Multiply(Field other)
         {
-            return new Real(value + (other as Real).value);
+            return new Real(real * (other as Real).real);
         }
 
-        public Field Multiply(Field other)
+        public override Field Zero() { return zero; }
+
+        public override Field One() { return one; }
+
+        public override Field AddInverse()
         {
-            return new Real(value * (other as Real).value);
+            return new Real(-real);
         }
 
-        public Field Zero() { return zero; }
-
-        public Field One() { return one; }
-
-        public Field AddInverse()
+        public override Field MultInverse()
         {
-            return new Real(-value);
+            return new Real(1 / real);
         }
 
-        public Field MultInverse()
+        public override Complex Complement()
         {
-            return new Real(1 / value);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Math.Abs(value - (obj as Real).value) < 0.0001f;
-        }
-
-        public override string ToString()
-        {
-            if (value.ToString().Equals("-0")) { return "0"; }
-            return value.ToString();
+            return this;
         }
     }
 }

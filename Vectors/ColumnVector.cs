@@ -55,4 +55,18 @@ namespace Linear_Algebra
             return GetEnumerator();
         }
     }
+
+    class CoordinateVector<F> : ColumnVector<F>, InnerProduct<F> where F : Complex
+    {
+        public F DotProduct(InnerProduct<F> vec)
+        {
+            F res = FieldZero();
+            CoordinateVector<F> v = vec as CoordinateVector<F>;
+            for (int i = 0; i < length; i++)
+            {
+                res = (F)res.Add(this[i].Multiply(v[i].Complement()));
+            }
+            return res;
+        }
+    }
 }

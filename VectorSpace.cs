@@ -8,8 +8,8 @@ namespace Linear_Algebra
     // invariant: basis is a list of linearly independent vectors
     class VectorSpace<V, F> : IEnumerable<V> where F : Field where V : Vector<F>
     {
-        private List<V> basis;
-        private SquareMatrix<F> matrixRep;
+        protected List<V> basis;
+        protected SquareMatrix<F> matrixRep;
         public readonly int dim;
 
         public VectorSpace(int dim)
@@ -22,6 +22,11 @@ namespace Linear_Algebra
         // @pre all vectors added to the space must have the Length() be the same as dim
         public VectorSpace(int dim, params V[] vectors)
             : this(dim) { Add(vectors); }
+
+        public virtual VectorSpace<V, F> Clone()
+        {
+            return new VectorSpace<V, F>(dim);
+        }
 
         public int Dimension() { return basis.Count; }
 
@@ -103,8 +108,9 @@ namespace Linear_Algebra
         // @pre U.dim == W.dim
         public static VectorSpace<V, F> operator + (VectorSpace<V, F> U, VectorSpace<V, F> W)
         {
-            VectorSpace<V, F> V = new VectorSpace<V, F>(U.dim, U.basis.ToArray());
-            foreach(V vec in W) { V.Add(vec); }
+            VectorSpace<V, F> V = U.Clone();
+            V.Add(U.basis.ToArray());
+            V.Add(W.basis.ToArray());
             return V;
         }
 
@@ -134,7 +140,7 @@ namespace Linear_Algebra
             }
 
             VectorSpace<ColumnVector<F>, F> nullSpace = new Matrix<F>(matrix).NullSpace();
-            VectorSpace<V, F> V = new VectorSpace<V, F>(U.dim);
+            VectorSpace<V, F> V = U.Clone();
             F[] scalars;
             foreach(ColumnVector<F> vec in nullSpace)
             {

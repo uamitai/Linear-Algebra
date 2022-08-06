@@ -68,7 +68,7 @@
         // @pre for all vector v in vectorSpace, domain.Contains(v)
         public VectorSpace<W, F> Image(VectorSpace<V, F> vectorSpace)
         {
-            VectorSpace<W, F> im = new VectorSpace<W, F>(range.dim);
+            VectorSpace<W, F> im = range.Clone();
             foreach (V vector in vectorSpace)
             {
                 im.Add(transform(vector));
@@ -106,7 +106,7 @@
 
         public VectorSpace<V, F> Kernel()
         {
-            VectorSpace<V, F> kernel = new VectorSpace<V, F>(domain.dim);
+            VectorSpace<V, F> kernel = domain.Clone();
             VectorSpace<ColumnVector<F>, F> nullSpace = matrixRep.NullSpace();
             foreach (ColumnVector<F> vector in nullSpace)
             {
