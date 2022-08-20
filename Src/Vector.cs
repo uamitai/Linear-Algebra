@@ -19,6 +19,8 @@
 
         ColumnVector<F> ToColumnVector();
 
+        int Length();
+
         public static Vector<F> operator + (Vector<F> vec1, Vector<F> vec2)
         {
             return vec1.Add(vec2);

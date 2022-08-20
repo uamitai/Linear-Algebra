@@ -11,10 +11,10 @@
             return new InnerProductSpace<V, F>(dim);
         }
 
-        public InnerProductSpace<V, F> Normalize()
+        public InnerProductSpace<V, F> Normalized()
         {
             InnerProductSpace<V, F> norm = Clone();
-            foreach(InnerProduct<F> vector in this)
+            foreach(V vector in this)
             {
                 norm.Add((V)vector.Normalize());
             }
@@ -24,7 +24,7 @@
         public InnerProductSpace<V, F> GrahamSchmidt()
         {
             InnerProductSpace<V, F > GS = Clone();
-            V vector = (V)GS.basis[0].Zero();
+            V vector;
             for (int i = 0; i < Dimension(); i++)
             {
                 vector = basis[i];

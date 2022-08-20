@@ -158,5 +158,10 @@ namespace Linear_Algebra
             }
             return res;
         }
+
+        public int Length()
+        {
+            return entries.Length;
+        }
     }
 }

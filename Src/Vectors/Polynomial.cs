@@ -147,5 +147,10 @@
             }
             return string.Format("({0})x^{1}", coeff, pow);
         }
+
+        public int Length()
+        {
+            return coefficients.length;
+        }
     }
 }

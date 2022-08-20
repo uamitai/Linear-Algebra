@@ -1,4 +1,7 @@
-﻿namespace Linear_Algebra
+﻿using System.Collections.Generic;
+
+
+namespace Linear_Algebra
 {
     class SquareMatrix<F> : Matrix<F> where F : Field
     {
@@ -188,6 +191,55 @@
         public VectorSpace<ColumnVector<F>, F> EigenSpace(F eigenValue)
         {
             return ((this - Identity().Multiply(eigenValue)) as SquareMatrix<F>).NullSpace();
+        }
+
+        // @pre this is a nilpotent matrix
+        // meaning for some k, this.Power(k) == Zero()
+        public SquareMatrix<F> NilpotentJordanForm()
+        {
+            SquareMatrix<F> A = Identity();
+            VectorSpace<ColumnVector<F>, F> B = new VectorSpace<ColumnVector<F>, F>(size), C, ker = B.Clone();
+            List<SquareMatrix<F>> powers = new List<SquareMatrix<F>>();
+            List<VectorSpace<ColumnVector<F>, F>> kernels = new List<VectorSpace<ColumnVector<F>, F>>();
+
+            // Make a list of powers of the transform, as well as the kernels of these powers
+            powers.Add(Identity());
+            kernels.Add(ker);
+            int l = 0;
+            while (!ker.IsSpanning())
+            {
+                A *= this;
+                ker = A.NullSpace();
+                powers.Add(A);
+                kernels.Add(ker);
+                l++;
+            }
+
+            for (int i = l; i >= 1; i--)
+            {
+                // Step 1: Take C to be the intersection of B and ker and complete it to ker
+                ker = kernels[i - 1];
+                C = VectorSpace<ColumnVector<F>, F>.Intersection(B, ker);
+                foreach (ColumnVector<F> vector in ker) { C.Add(vector); }
+
+                // Step 2: Add the remaining vectors of the next kernel intersection
+                ker = kernels[i];
+                foreach (ColumnVector<F> vector in VectorSpace<ColumnVector<F>, F>.Intersection(B, ker)) { C.Add(vector); }
+
+                // Step 3: each vector in ker which isn't in C starts a chain
+                l = ker.Dimension() - C.Dimension();
+                foreach (ColumnVector<F> vector in ker)
+                {
+                    if (C.Contains(vector)) { continue; }
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        B.Add(powers[j] * vector);
+                    }
+                    if (--l <= 0) { break; }
+                }
+            }
+            System.Console.WriteLine(B);
+            return new Transform<ColumnVector<F>, F>(B, vector => this * vector).MatrixRepresentation();
         }
     }
 }

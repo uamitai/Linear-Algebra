@@ -244,5 +244,10 @@
             }
             return new ColumnVector<F>(sol);
         }
+
+        public static QuotientSpace<ColumnVector<F>, F> SolutionSpaceOfLinearSystem(Matrix<F> matrix, ColumnVector<F> vector)
+        {
+            return new QuotientSpace<ColumnVector<F>, F>(LinearSystemSolution(matrix, vector), matrix.NullSpace());
+        }
     }
 }

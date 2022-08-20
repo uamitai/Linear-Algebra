@@ -19,7 +19,7 @@ namespace Linear_Algebra
         }
 
         // @pre no null vectors
-        // @pre all vectors added to the space must have the Length() be the same as dim
+        // @pre all vectors added to the space must have the size as dim
         public VectorSpace(int dim, params V[] vectors)
             : this(dim) { Add(vectors); }
 
@@ -32,6 +32,8 @@ namespace Linear_Algebra
 
         public bool IsEmpty() { return !basis.Any(); }
 
+        public bool IsSpanning() { return Dimension() == dim; }
+
         // @pre no null vectors
         // @pre all vectors added to the space must have their size be the same set as the space dimension
         // for example "new VectorSpace<ColumnVector<Real>, Real>(3)" can only have column vectors with 3 entries
@@ -39,6 +41,7 @@ namespace Linear_Algebra
         {
             foreach(V vec in vectors)
             {
+                if(vec.Length() != dim) { continue; }
                 if (Dimension() < dim && !Contains(vec))
                 {
                     basis.Add(vec);
@@ -88,7 +91,7 @@ namespace Linear_Algebra
             matrixRep = new SquareMatrix<F>(matrix);
         }
 
-        // @pre from.Dimension() == from.dim == to.dim == to.Dimension()
+        // @pre from.dim == to.dim && from.IsSpanning() && to.IsSpanning()
         public static SquareMatrix<F> TransitionMatrix(VectorSpace<V, F> from, VectorSpace<V, F> to)
         {
             return to.matrixRep.Inverse() * from.matrixRep;
@@ -115,7 +118,7 @@ namespace Linear_Algebra
         }
 
         // @pre U.dim == W.dim
-        public static VectorSpace<V, F> intersection(VectorSpace<V, F> U, VectorSpace<V, F> W)
+        public static VectorSpace<V, F> Intersection(VectorSpace<V, F> U, VectorSpace<V, F> W)
         {
             F[,] matrix = new F[U.dim, U.Dimension() + W.Dimension()];
             ColumnVector<F> colVec;
@@ -153,6 +156,13 @@ namespace Linear_Algebra
             }
             return V;
         }
+
+        public static QuotientSpace<V, F> operator + (V vector, VectorSpace<V, F> subSpace)
+        {
+            return new QuotientSpace<V, F>(vector, subSpace);
+        }
+
+        public void Reverse() { basis.Reverse(); }
 
         public override string ToString() 
         {
