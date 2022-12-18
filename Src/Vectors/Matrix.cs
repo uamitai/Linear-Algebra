@@ -25,17 +25,15 @@
             return new ColumnVector<F>(vec);
         }
 
-        public Matrix<F> Transpose()
+        public virtual Matrix<F> Transpose()
         {
-            Matrix<F> tr = new Matrix<F>(cols, rows);
-            for (int i = 0; i < cols; i++)
-            {
-                for (int j = 0; j < rows; j++)
-                {
-                    tr[i, j] = this[j, i];
-                }
-            }
-            return tr;
+            return new Matrix<F>(Transposition());
+        }
+
+        public virtual Transform<ColumnVector<F>, ColumnVector<F>, F> ToTransform()
+        {
+            return new Transform<ColumnVector<F>, ColumnVector<F>, F>(
+                RowSpace() + NullSpace(), ColumnSpace(), Vector => this * Vector);
         }
 
         #region Gaussian Elimination and matrix ranking
@@ -202,6 +200,11 @@
             return colSpace;
         }
 
+        public VectorSpace<ColumnVector<F>, F> RowSpace()
+        {
+            return Transpose().ColumnSpace();
+        }
+
         // @post $ret == null iff the system has no solution
         public static ColumnVector<F> LinearSystemSolution(Matrix<F> matrix, ColumnVector<F> vector)
         {
@@ -247,7 +250,7 @@
 
         public static QuotientSpace<ColumnVector<F>, F> SolutionSpaceOfLinearSystem(Matrix<F> matrix, ColumnVector<F> vector)
         {
-            return new QuotientSpace<ColumnVector<F>, F>(LinearSystemSolution(matrix, vector), matrix.NullSpace());
+            return LinearSystemSolution(matrix, vector) + matrix.NullSpace();
         }
     }
 }

@@ -56,9 +56,14 @@ namespace Linear_Algebra
             return sum;
         }
 
-        public Transform<ColumnVector<F>, F> ToTransform()
+        public override SquareMatrix<F> Transpose()
         {
-            return new Transform<ColumnVector<F>, F>(ColumnSpace() + NullSpace(), vector => this * vector);
+            return new SquareMatrix<F>(Transposition());
+        }
+
+        public override Transform<ColumnVector<F>, F> ToTransform()
+        {
+            return new Transform<ColumnVector<F>, F>(RowSpace() + NullSpace(), vector => this * vector);
         }
 
         // @pre no null entries
@@ -92,17 +97,6 @@ namespace Linear_Algebra
                 exp /= 2;
             }
             return res;
-        }
-
-        // @post $this will be upper triangular
-        // @post $ret will be lower triangular
-        // no swaps were performed $implies $prev == $ret * $this
-        public SquareMatrix<F> LUDecomposition()
-        {
-            SquareMatrix<F> L = Identity();
-            AddOp add = (src, dst, scalar) => L[dst, src] = (F)scalar.AddInverse();
-            RowEchelonForm(this, AddRow + add, SwapRows);
-            return L;
         }
 
         #region Determinants, Adjoints and Inverses
@@ -171,21 +165,29 @@ namespace Linear_Algebra
         // @pre IsInvertible()
         public SquareMatrix<F> Inverse()
         {
-            SquareMatrix<F> clone = Clone(), id = Identity();
+            SquareMatrix<F> clone = Clone(), inv = Identity();
             AddOp add = clone.AddRow;
             MultiplyOp multiply = clone.MultiplyRow;
             SwapOp swap = clone.SwapRows;
 
             int rank = GaussianElimination(clone, 
-                add + id.AddRow , multiply + id.MultiplyRow, swap + id.SwapRows);
-            return rank == size ? id : null;
+                add + inv.AddRow , multiply + inv.MultiplyRow, swap + inv.SwapRows);
+            return rank == size ? inv : null;
         }
 
         #endregion
 
-        public bool IsEigenValue(F scalar)
+        #region Decompositions and Normal Forms
+
+        // @post $this will be upper triangular
+        // @post $ret will be lower triangular
+        // no swaps were performed $implies $prev == $ret * $this
+        public SquareMatrix<F> LUDecomposition()
         {
-            return !((this - Identity().Multiply(scalar)) as SquareMatrix<F>).IsInvertible();
+            SquareMatrix<F> L = Identity();
+            AddOp add = (src, dst, scalar) => L[dst, src] = (F)scalar.AddInverse();
+            RowEchelonForm(this, AddRow + add, SwapRows);
+            return L;
         }
 
         public VectorSpace<ColumnVector<F>, F> EigenSpace(F eigenValue)
@@ -228,18 +230,21 @@ namespace Linear_Algebra
 
                 // Step 3: each vector in ker which isn't in C starts a chain
                 l = ker.Dimension() - C.Dimension();
+                if (l <= 0) { continue; }
                 foreach (ColumnVector<F> vector in ker)
                 {
+                    if (l == 0) { break; }
                     if (C.Contains(vector)) { continue; }
                     for (int j = i - 1; j >= 0; j--)
                     {
                         B.Add(powers[j] * vector);
                     }
-                    if (--l <= 0) { break; }
+                    l--;
                 }
             }
-            System.Console.WriteLine(B);
-            return new Transform<ColumnVector<F>, F>(B, vector => this * vector).MatrixRepresentation();
+            return B.MatrixByBasis(this);
         }
+
+        #endregion
     }
 }

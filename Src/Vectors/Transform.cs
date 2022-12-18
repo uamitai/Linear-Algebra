@@ -41,6 +41,12 @@ namespace Linear_Algebra
             return transform(vector);
         }
 
+        // @pre transform.domain.Contains(vector)
+        public static W operator * (Transform<V, W, F> transform, V vector)
+        {
+            return transform.ValueOf(vector);
+        }
+
         public virtual Vector<F> Add(Vector<F> vector)
         {
             Transform<V, W, F> other = vector as Transform<V, W, F>;
@@ -290,12 +296,13 @@ namespace Linear_Algebra
                 l = ker.Dimension() - C.Dimension();
                 foreach(V vector in ker)
                 {
+                    if (l == 0) { break; }
                     if (C.Contains(vector)) { continue; }
                     for (int j = i-1; j >= 0; j--)
                     {
-                        B.Add(powers[j].ValueOf(vector));
+                        B.Add(powers[j] * vector);
                     }
-                    if (--l <= 0) { break; }
+                    l--;
                 }
             }
             return new Transform<V, F>(B, transform);

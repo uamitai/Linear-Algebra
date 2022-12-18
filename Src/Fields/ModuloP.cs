@@ -86,6 +86,16 @@
                 }
                 return res;
             }
+
+            public float Magnitude()
+            {
+                return value;
+            }
+
+            public Field Conjugate()
+            {
+                return this;
+            }
         }
     }
 }

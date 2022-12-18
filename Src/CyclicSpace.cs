@@ -12,7 +12,7 @@
             for (int i = 0; i < dim; i++)
             {
                 Add(vector);
-                vector = transform.ValueOf(vector);
+                vector = transform * vector;
             }
         }
     }

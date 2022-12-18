@@ -1,31 +1,24 @@
-﻿using System;
-
-
-namespace Linear_Algebra
+﻿namespace Linear_Algebra
 {
     class Real : Complex
     {
-        public const float eps = 0.005f;
-        public static readonly new Real zero = new Real(0f);
-        public static readonly new Real one = new Real(1f);
+        public const float eps = 0.0003f;
+        public static readonly Real zero = new Real(0f);
+        public static readonly Real one = new Real(1f);
 
         public Real(float value) : base(value, 0) { }
 
         public override Field Add(Field other)
         {
-            float res = real + (other as Real).real;
-            if(Math.Abs(res) < eps) { return zero; }
-            return new Real(res);
+            Real res = new Real(real + (other as Real).real);
+            return res.Equals(zero) ? zero : res.Equals(one) ? one : res;
         }
 
         public override Field Multiply(Field other)
         {
-            return new Real(real * (other as Real).real);
+            Real res = new Real(real * (other as Real).real);
+            return res.Equals(one) ? one : res;
         }
-
-        public override Field Zero() { return zero; }
-
-        public override Field One() { return one; }
 
         public override Field AddInverse()
         {
@@ -37,7 +30,7 @@ namespace Linear_Algebra
             return new Real(1 / real);
         }
 
-        public override Complex Complement()
+        public override Real Conjugate()
         {
             return this;
         }

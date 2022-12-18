@@ -5,9 +5,6 @@ namespace Linear_Algebra
 {
     class Complex : Field
     {
-        public static readonly Complex zero = new Complex(0f, 0f);
-        public static readonly Complex one = new Complex(1f, 0f);
-
         protected readonly float real;
         private readonly float imaginary;
 
@@ -33,9 +30,9 @@ namespace Linear_Algebra
             return new Complex(real * complex.real - imaginary * complex.imaginary, real * complex.imaginary + imaginary * complex.real);
         }
 
-        public virtual Field Zero() { return zero; }
+        public Field Zero() { return Real.zero; }
 
-        public virtual Field One() { return one; }
+        public Field One() { return Real.one; }
 
         public virtual Field AddInverse()
         {
@@ -52,12 +49,12 @@ namespace Linear_Algebra
             return real * real + imaginary * imaginary;
         }
 
-        public Complex Magnitude()
+        public float Magnitude()
         {
-            return new Real((Multiply(Complement()) as Complex).real);
+            return (float)Math.Sqrt(SqrMagnitude());
         }
 
-        public virtual Complex Complement()
+        public virtual Complex Conjugate()
         {
             return new Complex(real, -imaginary);
         }

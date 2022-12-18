@@ -9,7 +9,7 @@ namespace Linear_Algebra
     class VectorSpace<V, F> : IEnumerable<V> where F : Field where V : Vector<F>
     {
         protected List<V> basis;
-        protected SquareMatrix<F> matrixRep;
+        public SquareMatrix<F> basisMatrix { get; protected set; }
         public readonly int dim;
 
         public VectorSpace(int dim)
@@ -45,7 +45,7 @@ namespace Linear_Algebra
                 if (Dimension() < dim && !Contains(vec))
                 {
                     basis.Add(vec);
-                    GetMatrixRep();
+                    basisMatrix = BasisMatrix();
                 }
             }
         }
@@ -55,28 +55,28 @@ namespace Linear_Algebra
         {
             if (vector.Equals(vector.Zero())) { return true; }
             if (IsEmpty()) { return false; }
-            return Matrix<F>.LinearSystemSolution(matrixRep, vector.ToColumnVector()) != null;
+            return Matrix<F>.LinearSystemSolution(basisMatrix, vector.ToColumnVector()) != null;
         }
 
         // @pre !IsEmpty() && vector.Length() == dim
         public ColumnVector<F> CoordinatesOf(V vector)
         {
-            return Matrix<F>.LinearSystemSolution(matrixRep, vector.ToColumnVector());
+            return Matrix<F>.LinearSystemSolution(basisMatrix, vector.ToColumnVector());
         }
 
-        private void GetMatrixRep()
+        // @pre IsSpanning()
+        protected SquareMatrix<F> BasisMatrix()
         {
-            if (IsEmpty()) { return; }
-            F[,] matrix = new F[dim, dim];
+            F[,] mat = new F[dim, dim];
             ColumnVector<F> colVec;
+            F zero = (F)this[0].ToColumnVector()[0].Zero();
             int col = 0;
-            F zero = (F)basis[0].ToColumnVector()[0].Zero();
-            foreach (V vec in this)
+            foreach(V vector in this)
             {
-                colVec = vec.ToColumnVector();
+                colVec = vector.ToColumnVector();
                 for (int row = 0; row < dim; row++)
                 {
-                    matrix[row, col] = colVec[row];
+                    mat[row, col] = colVec[row];
                 }
                 col++;
             }
@@ -84,26 +84,32 @@ namespace Linear_Algebra
             {
                 for (int row = 0; row < dim; row++)
                 {
-                    matrix[row, col] = zero;
+                    mat[row, col] = zero;
                 }
                 col++;
             }
-            matrixRep = new SquareMatrix<F>(matrix);
+            return new SquareMatrix<F>(mat);
         }
 
         // @pre from.dim == to.dim && from.IsSpanning() && to.IsSpanning()
         public static SquareMatrix<F> TransitionMatrix(VectorSpace<V, F> from, VectorSpace<V, F> to)
         {
-            return to.matrixRep.Inverse() * from.matrixRep;
+            return to.basisMatrix.Inverse() * from.basisMatrix;
+        }
+
+        // @pre IsSpanning
+        public SquareMatrix<F> MatrixByBasis(SquareMatrix<F> matrix)
+        {
+            return basisMatrix.Inverse() * matrix * basisMatrix;
         }
 
         // @pre scalars.length == Dimension() && !IsEmpty()
         public V LinearCombination(ColumnVector<F> scalars)
         {
-            V linearComb = (V)basis[0].Zero();
+            V linearComb = (V)this[0].Zero();
             for (int i = 0; i < Dimension(); i++)
             {
-                linearComb = (V)(linearComb + scalars[i] * basis[i]);
+                linearComb = (V)(linearComb + scalars[i] * this[i]);
             }
             return linearComb;
         }
@@ -179,6 +185,12 @@ namespace Linear_Algebra
                 if (!Contains(vec)) { return false; }
             }
             return true;
+        }
+
+        protected V this[int index]
+        {
+            get { return basis[index]; }
+            set { basis[index] = value; }
         }
 
         public IEnumerator<V> GetEnumerator() { return basis.GetEnumerator(); }

@@ -127,6 +127,19 @@ namespace Linear_Algebra
             return new ColumnVector<F>(matrix.MatMultiplication(vector));
         }
 
+        protected F[,] Transposition()
+        {
+            F[,] tr = new F[cols, rows];
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    tr[i, j] = this[j, i];
+                }
+            }
+            return tr;
+        }
+
         protected F FieldZero() { return (F)this[0, 0].Zero(); }
 
         protected F FieldOne() { return (F)this[0, 0].One(); }

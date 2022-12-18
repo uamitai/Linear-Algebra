@@ -21,19 +21,24 @@
             return norm;
         }
 
-        public InnerProductSpace<V, F> GrahamSchmidt()
+        public InnerProductSpace<V, F> GramSchmidt()
         {
-            InnerProductSpace<V, F > GS = Clone();
-            V vector;
-            for (int i = 0; i < Dimension(); i++)
+            InnerProductSpace<V, F> GS = Clone();
+            int dimension = Dimension();
+            V v;
+            F scalar;
+            foreach(V vector in this) { GS.Add(vector); }
+            for (int i = 0; i < dimension; i++)
             {
-                vector = basis[i];
-                for (int j = 0; j < i; j++)
+                v = GS[i];
+                GS[i] = (V)v.Normalize();
+                scalar = (F)(v * v).MultInverse();
+                for (int j = i + 1; j < dimension; j++)
                 {
-                    vector = (V)(vector - basis[j].Multiply((F)(basis[i] * basis[j]).Multiply((basis[j] * basis[j]).MultInverse())));
+                    GS[j] = (V)(GS[j] - v.Multiply(GS[j] * v).Multiply(scalar));
                 }
-                GS.Add(vector);
             }
+            GS.basisMatrix = GS.BasisMatrix();
             return GS;
         }
     }
