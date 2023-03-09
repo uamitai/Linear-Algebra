@@ -190,11 +190,6 @@ namespace Linear_Algebra
             return L;
         }
 
-        public VectorSpace<ColumnVector<F>, F> EigenSpace(F eigenValue)
-        {
-            return ((this - Identity().Multiply(eigenValue)) as SquareMatrix<F>).NullSpace();
-        }
-
         // @pre this is a nilpotent matrix
         // meaning for some k, this.Power(k) == Zero()
         public SquareMatrix<F> NilpotentJordanForm()

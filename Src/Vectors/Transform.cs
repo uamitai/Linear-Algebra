@@ -254,11 +254,6 @@ namespace Linear_Algebra
                 q => new QuotientSpace<V, F>(transform(q.vector), subSpace));
         }
 
-        public VectorSpace<V, F> EigenSpace(F eigenValue)
-        {
-            return ((this - Identity().Multiply(eigenValue)) as Transform<V, F>).Kernel();
-        }
-
         // @pre this is a nilpotent transformation
         // meaning for some k, this.Power(k) == Zero()
         public Transform<V, F> NilpotentJordanForm()

@@ -118,12 +118,12 @@
                 coeff = this[i];
                 if (coeff.Equals(coeff.Zero())) { continue; }
                 res += res == "" ? "" : " + ";
-                res += term(coeff, i);
+                res += Term(coeff, i);
             }
             return res == "" ? "0" : res;
         }
 
-        private string term(F coeff, int pow)
+        private static string Term(F coeff, int pow)
         {
             if (coeff.Equals(coeff.One()))
             {
