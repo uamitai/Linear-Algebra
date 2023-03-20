@@ -46,5 +46,10 @@
         {
             return vector.Zero();
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0}\n+\n\n{1}\n", vector.ToString(), subSpace.ToString());
+        }
     }
 }

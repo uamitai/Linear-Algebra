@@ -172,7 +172,7 @@ namespace Linear_Algebra
 
             int rank = GaussianElimination(clone, 
                 add + inv.AddRow , multiply + inv.MultiplyRow, swap + inv.SwapRows);
-            return rank == size ? inv : null;
+            return inv;
         }
 
         #endregion

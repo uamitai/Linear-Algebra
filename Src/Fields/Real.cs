@@ -10,12 +10,14 @@
 
         public override Field Add(Field other)
         {
+            if((other as Real) == null) { return other.Add(this); }
             Real res = new Real(real + (other as Real).real);
             return res.Equals(zero) ? zero : res.Equals(one) ? one : res;
         }
 
         public override Field Multiply(Field other)
         {
+            if((other as Real) == null) { return other.Multiply(this); }
             Real res = new Real(real * (other as Real).real);
             return res.Equals(one) ? one : res;
         }

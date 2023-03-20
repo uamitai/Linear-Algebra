@@ -21,6 +21,7 @@ namespace Linear_Algebra
             float im = imaginary + complex.imaginary;
             if(Math.Abs(re) < Real.eps) { re = 0; }
             if(Math.Abs(im) < Real.eps) { im = 0; }
+            if(Math.Abs(re - 1) < Real.eps) { re = 1; }
             return new Complex(re, im);
         }
 
